@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "511509615982",
+    "firebase_url": "https://notional-plate-182716.firebaseio.com",
+    "project_id": "notional-plate-182716",
+    "storage_bucket": "notional-plate-182716.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511509615982:android:6653021092993d38",
+        "android_client_info": {
+          "package_name": "com.example.jesse.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "511509615982-ra32eg3a45d9b61guerieq662hr4753s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.jesse.test",
+            "certificate_hash": "2b2f68c4a9b55bdc22b8ae0d9e93726efb222ada"
+          }
+        },
+        {
+          "client_id": "511509615982-5vtr0d19ojg9dfn9p13bf77nrj0eopab.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6PA_143_NXADET5_WDH9VOesD19GqLds"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "511509615982-5vtr0d19ojg9dfn9p13bf77nrj0eopab.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

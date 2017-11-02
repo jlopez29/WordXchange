@@ -1,45 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/boardLayout"
-    android:orientation="horizontal"
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:weightSum="5">
+    android:layout_height="match_parent">
 
-    <!--<Button-->
-        <!--android:id="@+id/button1"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:text="B" />-->
 
-    <!--<Button-->
-        <!--android:id="@+id/button2"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:text="O" />-->
+    <ImageView
+        android:id="@+id/wordStatus"
+        android:layout_width="100dp"
+        android:layout_height="120dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="top"
+        app:srcCompat="@drawable/green_check_mark" />
 
-    <!--<Button-->
-        <!--android:id="@+id/button3"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:text="A" />-->
+    <LinearLayout
+        android:id="@+id/boardLayout"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:weightSum="5">
 
-    <!--<Button-->
-        <!--android:id="@+id/button4"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:text="R" />-->
+    </LinearLayout>
 
-    <!--<Button-->
-        <!--android:id="@+id/button5"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:text="D" />-->
-
-</LinearLayout>
+</RelativeLayout>

@@ -1,27 +1,22 @@
 package com.example.jesse.test;
 
+import android.content.DialogInterface;
 import android.content.res.AssetManager;
-import android.graphics.Path;
 import android.os.Bundle;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -34,7 +29,11 @@ public class MainActivity extends AppCompatActivity {
     String TAG = "*** Main ***";
     Set<String> wordSet;
     ArrayList<String> wordList;
-
+    String[] alphabet = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+    Button currButton;
+    int currIndex = 0;
+    String word;
+    LinearLayout la;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,10 +92,58 @@ public class MainActivity extends AppCompatActivity {
         Random r = new Random();
         int rand = r.nextInt(max - min) + min;
 
-        String word = wordList.get(rand);
+        word = wordList.get(rand);
 
-        LinearLayout la = (LinearLayout)findViewById(R.id.boardLayout);
+        while(word.length() > 4)
+        {
+            r = new Random();
+            rand = r.nextInt(max - min) + min;
+
+            word = wordList.get(rand);
+        }
+
+        la = (LinearLayout)findViewById(R.id.boardLayout);
         la.setWeightSum(word.length());
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Letters")
+                .setItems(alphabet, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // The 'which' argument contains the index position
+                        // of the selected item
+                        Log.i(TAG,"letter: " + alphabet[which]);
+                        String newWord = "";
+                        ImageView iv = (ImageView)findViewById(R.id.wordStatus);
+
+                        for(int i = 0; i < word.length(); i++)
+                        {
+                            if(i != currIndex)
+                            {
+                                Button b = (Button)la.findViewWithTag("Button"+i);
+                                newWord += b.getText();
+                            }
+                            else
+                                newWord += alphabet[which];
+
+                        }
+                        Log.i(TAG,"new word : " + newWord);
+
+                        if(contains(newWord))
+                        {
+                            Log.i(TAG,"VALID WORD");
+                            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
+                            currButton.setText(alphabet[which]);
+                        }
+                        else {
+                            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
+                            Log.i(TAG, "INVALID WORD");
+                        }
+                    }
+                });
+
+
+
+//        View.OnClickListener click =
 
         for(int i = 0; i < word.length(); i++)
         {
@@ -106,8 +153,15 @@ public class MainActivity extends AppCompatActivity {
             Character c = word.charAt(i);
             btnTag.setText(c.toString());
             btnTag.setTag("Button" + i);
-
-            //add button to the layout
+            final int z = i;
+            btnTag.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Log.i("TAG", "Click " + z);
+                    currIndex = z;
+                    currButton = (Button)la.findViewWithTag("Button"+z);
+                    builder.show();
+                }
+            });
             la.addView(btnTag);
         }
 

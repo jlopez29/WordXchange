@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.google.firebase.database.DataSnapshot;
@@ -18,8 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -28,7 +32,8 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     String TAG = "*** Main ***";
-    Set<String> wordsSet;
+    Set<String> wordSet;
+    ArrayList<String> wordList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +70,14 @@ public class MainActivity extends AppCompatActivity {
                 InputStream is = assetManager.open("dictionary.txt");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                 String read = reader.readLine();
-                wordsSet = new HashSet<>();
+                wordSet = new HashSet<>();
+                wordList = new ArrayList<>();
                 //Collections.addAll(wordsSet, words);
                 while(read != null)
                 {
                     read = read.toLowerCase();
-                    wordsSet.add(read);
+                    wordSet.add(read);
+                    wordList.add(read);
                     read = reader.readLine();
                 }
 
@@ -80,10 +87,34 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+        int min = 0;
+        int max = wordSet.size();
+
+        Random r = new Random();
+        int rand = r.nextInt(max - min) + min;
+
+        String word = wordList.get(rand);
+
+        LinearLayout la = (LinearLayout)findViewById(R.id.boardLayout);
+        la.setWeightSum(word.length());
+
+        for(int i = 0; i < word.length(); i++)
+        {
+            //set the properties for button
+            Button btnTag = new Button(this);
+            btnTag.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            Character c = word.charAt(i);
+            btnTag.setText(c.toString());
+            btnTag.setTag("Button" + i);
+
+            //add button to the layout
+            la.addView(btnTag);
+        }
+
     }
 
     public boolean contains(String word)
     {
-        return wordsSet.contains(word);
+        return wordSet.contains(word);
     }
 }

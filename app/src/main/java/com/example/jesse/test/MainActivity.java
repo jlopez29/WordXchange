@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     int currIndex = 0;
     String word;
     LinearLayout la;
+    AlertDialog.Builder builder;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,26 +87,12 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-        int min = 0;
-        int max = wordSet.size();
-
-        Random r = new Random();
-        int rand = r.nextInt(max - min) + min;
-
-        word = wordList.get(rand);
-
-        while(word.length() > 4)
-        {
-            r = new Random();
-            rand = r.nextInt(max - min) + min;
-
-            word = wordList.get(rand);
-        }
+        randomWord();
 
         la = (LinearLayout)findViewById(R.id.boardLayout);
         la.setWeightSum(word.length());
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Letters")
                 .setItems(alphabet, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -130,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
                         if(contains(newWord))
                         {
+                            word = newWord;
                             Log.i(TAG,"VALID WORD");
                             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
                             currButton.setText(alphabet[which]);
@@ -142,12 +130,75 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
+        writeBoard();
 
-//        View.OnClickListener click =
+        Button resetBoard = (Button)findViewById(R.id.newBoard);
+
+        resetBoard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("Reset Board","Clicked");
+                deleteBoard();
+                randomWord();
+                writeBoard();
+            }
+        });
+
+    }
+
+    public boolean contains(String word)
+    {
+        return wordSet.contains(word);
+    }
+
+    public boolean deleteLetter(int index)
+    {
+        Log.i(TAG,"letter: " + currButton.getText());
+        String newWord = "";
+        ImageView iv = (ImageView)findViewById(R.id.wordStatus);
 
         for(int i = 0; i < word.length(); i++)
         {
-            //set the properties for button
+            if(i != currIndex)
+            {
+                Button b = (Button)la.findViewWithTag("Button"+i);
+                newWord += b.getText();
+            }
+
+        }
+        Log.i(TAG,"new word : " + newWord);
+
+        if(contains(newWord))
+        {
+            deleteBoard();
+            word = newWord;
+            Log.i(TAG,"VALID WORD");
+            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
+            la.setWeightSum(word.length());
+            writeBoard();
+
+            return true;
+        }
+        else {
+            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
+            Log.i(TAG, "INVALID WORD");
+            return false;
+        }
+    }
+
+    public void deleteBoard()
+    {
+        for(int i = 0; i < word.length(); i++)
+        {
+            Button b = (Button)la.findViewWithTag("Button" + i);
+            la.removeView(b);
+        }
+    }
+
+    public void writeBoard()
+    {
+        for(int i = 0; i < word.length(); i++)
+        {
             Button btnTag = new Button(this);
             btnTag.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
             Character c = word.charAt(i);
@@ -162,13 +213,34 @@ public class MainActivity extends AppCompatActivity {
                     builder.show();
                 }
             });
+            btnTag.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    Log.i("TAG", "Long Click " + z);
+                    currIndex = z;
+                    currButton = (Button)la.findViewWithTag("Button"+z);
+                    deleteLetter(currIndex);
+                    return true;
+                }
+            });
             la.addView(btnTag);
         }
-
     }
-
-    public boolean contains(String word)
+    public void randomWord()
     {
-        return wordSet.contains(word);
+        int min = 0;
+        int max = wordSet.size();
+
+        Random r = new Random();
+        int rand = r.nextInt(max - min) + min;
+
+        word = wordList.get(rand);
+
+        while(word.length() > 4)
+        {
+            r = new Random();
+            rand = r.nextInt(max - min) + min;
+
+            word = wordList.get(rand);
+        }
     }
 }

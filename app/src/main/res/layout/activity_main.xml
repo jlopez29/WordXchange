@@ -14,14 +14,23 @@
         android:layout_gravity="top"
         app:srcCompat="@drawable/green_check_mark" />
 
+
+
     <LinearLayout
         android:id="@+id/boardLayout"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:weightSum="5">
-
+        android:gravity="center">
     </LinearLayout>
+
+    <Button
+        android:id="@+id/newBoard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="top"
+        android:text="New Board" />
 
 </RelativeLayout>

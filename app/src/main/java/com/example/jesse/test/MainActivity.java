@@ -1,16 +1,22 @@
 package com.example.jesse.test;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,16 +35,25 @@ public class MainActivity extends AppCompatActivity {
     String TAG = "*** Main ***";
     Set<String> wordSet;
     ArrayList<String> wordList;
+    ArrayList<String> usedWords;
     String[] alphabet = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
     Button currButton;
     int currIndex = 0;
+    boolean add = false;
     String word;
+    String ogWord;
+    boolean retry = false;
     LinearLayout la;
     AlertDialog.Builder builder;
+    ImageView iv;
+    int score = 0;
+    Counter countDown;
+    Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = this;
         /*
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -86,11 +101,17 @@ public class MainActivity extends AppCompatActivity {
             {
                 e.printStackTrace();
             }
+        usedWords = new ArrayList<>();
 
         randomWord();
+        ogWord = word;
+
+        usedWords.add(word);
 
         la = (LinearLayout)findViewById(R.id.boardLayout);
-        la.setWeightSum(word.length());
+        int sum = (word.length() * 2) + 1;
+        la.setWeightSum(sum);
+        iv = (ImageView)findViewById(R.id.wordStatus);
 
         builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Letters")
@@ -100,37 +121,82 @@ public class MainActivity extends AppCompatActivity {
                         // of the selected item
                         Log.i(TAG,"letter: " + alphabet[which]);
                         String newWord = "";
-                        ImageView iv = (ImageView)findViewById(R.id.wordStatus);
 
-                        for(int i = 0; i < word.length(); i++)
+                        int length = (word.length() * 2) + 1;
+
+                        if(add)
+                            Log.i(TAG,"Add letter");
+                        else
+                            Log.i(TAG,"Change letter");
+
+                        for(int i = 0; i < length; i++)
                         {
-                            if(i != currIndex)
+                            if(!add)
                             {
-                                Button b = (Button)la.findViewWithTag("Button"+i);
-                                newWord += b.getText();
+                                if((i % 2) != 0) {
+                                    if (i != currIndex) {
+                                        Button b = (Button) la.findViewWithTag("Button" + i);
+                                        newWord += b.getText();
+                                    } else
+                                        newWord += alphabet[which];
+                                }
                             }
                             else
-                                newWord += alphabet[which];
+                            {
+                                if(((i % 2) != 0) || (i == currIndex)) {
+                                    if (i != currIndex) {
+                                        Button b = (Button) la.findViewWithTag("Button" + i);
+                                        newWord += b.getText();
+                                    } else
+                                    {
+                                        newWord += alphabet[which];
+                                    }
+
+                                }
+                            }
 
                         }
                         Log.i(TAG,"new word : " + newWord);
 
-                        if(contains(newWord))
+                        if(contains(newWord) && !usedWords.contains(newWord))
                         {
-                            word = newWord;
                             Log.i(TAG,"VALID WORD");
+                            countDown.cancel();
+                            countDown.start();
+                            score++;
+                            word = newWord;
+                            usedWords.add(word);
                             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
-                            currButton.setText(alphabet[which]);
+                            if(add)
+                            {
+                                deleteBoard();
+                                int sum = (word.length() * 2) + 1;
+                                la.setWeightSum(sum);
+                                writeBoard();
+                            }
+                            else
+                                currButton.setText(alphabet[which]);
                         }
                         else {
                             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
                             Log.i(TAG, "INVALID WORD");
+                            if(usedWords.contains(newWord))
+                                Toast.makeText(MainActivity.this, "Duplicate Word!", Toast.LENGTH_SHORT).show();
+                            else
+                                Toast.makeText(MainActivity.this, "Invalid Word!", Toast.LENGTH_SHORT).show();
                         }
+
+                        add = false;
                     }
                 });
 
 
         writeBoard();
+
+        countDown = new Counter(30000,1000);
+        countDown.start();
+
+        Log.i(TAG,"Original word: " + word);
 
         Button resetBoard = (Button)findViewById(R.id.newBoard);
 
@@ -138,12 +204,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i("Reset Board","Clicked");
-                deleteBoard();
-                randomWord();
-                writeBoard();
+                newGame();
             }
         });
 
+    }
+    public void newGame()
+    {
+        Log.i("New Game","Entered");
+        usedWords = new ArrayList<>();
+        add = false;
+        score = 0;
+        deleteBoard();
+        if(!retry)
+        {
+            randomWord();
+            ogWord = word;
+            Log.i(TAG,"New word: " + word);
+        }
+        else
+            word = ogWord;
+        int sum = (word.length() * 2) + 1;
+        la.setWeightSum(sum);
+        writeBoard();
+        iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
+        retry = false;
+        countDown.start();
     }
 
     public boolean contains(String word)
@@ -157,35 +243,47 @@ public class MainActivity extends AppCompatActivity {
         String newWord = "";
         ImageView iv = (ImageView)findViewById(R.id.wordStatus);
 
-        for(int i = 0; i < word.length(); i++)
+        int length = (word.length() * 2) + 1;
+        for(int i = 0; i < length; i++)
         {
-            if(i != currIndex)
+            if((i%2) != 0)
             {
-                Button b = (Button)la.findViewWithTag("Button"+i);
-                newWord += b.getText();
+                if(i != currIndex)
+                {
+                    Button b = (Button)la.findViewWithTag("Button"+i);
+                    newWord += b.getText();
+                }
             }
+
 
         }
         Log.i(TAG,"new word : " + newWord);
 
         if(contains(newWord))
         {
+            countDown.cancel();
+            countDown.start();
             deleteBoard();
+            score++;
             word = newWord;
             Log.i(TAG,"VALID WORD");
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
-            la.setWeightSum(word.length());
+            int sum = (word.length() * 2) + 1;
+            la.setWeightSum(sum);
             writeBoard();
         }
         else {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
             Log.i(TAG, "INVALID WORD");
+            Toast.makeText(MainActivity.this, "Invalid Word!", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void deleteBoard()
     {
-        for(int i = 0; i < word.length(); i++)
+
+        int length = (word.length() * 2) + 1;
+        for(int i = 0; i < length; i++)
         {
             Button b = (Button)la.findViewWithTag("Button" + i);
             la.removeView(b);
@@ -194,32 +292,59 @@ public class MainActivity extends AppCompatActivity {
 
     public void writeBoard()
     {
-        for(int i = 0; i < word.length(); i++)
+        int length = (word.length() * 2) + 1;
+        int lIndex = 0;
+        for(int i = 0; i < length; i++)
         {
             Button btnTag = new Button(this);
-            btnTag.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-            Character c = word.charAt(i);
-            btnTag.setText(c.toString());
-            btnTag.setTag("Button" + i);
-            final int z = i;
-            btnTag.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Log.i("TAG", "Click " + z);
-                    currIndex = z;
-                    currButton = (Button)la.findViewWithTag("Button"+z);
-                    builder.show();
-                }
-            });
-            btnTag.setOnLongClickListener(new View.OnLongClickListener() {
-                public boolean onLongClick(View v) {
-                    Log.i("TAG", "Long Click " + z);
-                    currIndex = z;
-                    currButton = (Button)la.findViewWithTag("Button"+z);
-                    deleteLetter(currIndex);
-                    return true;
-                }
-            });
-            la.addView(btnTag);
+
+            if((i % 2) == 0)
+            {
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                lp.setMargins(0,120,0,0);
+                btnTag.setLayoutParams(lp);
+                btnTag.setText("^");
+                btnTag.setTag("Button" + i);
+                final int z = i;
+                btnTag.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Log.i("TAG", "Click " + z);
+                        add = true;
+                        currIndex = z;
+                        currButton = (Button)la.findViewWithTag("Button"+z);
+                        builder.show();
+                    }
+                });
+                la.addView(btnTag);
+            }
+            else
+            {
+                btnTag.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                Character c = word.charAt(lIndex);
+                btnTag.setText(c.toString());
+                btnTag.setTag("Button" + i);
+                final int z = i;
+                btnTag.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Log.i("TAG", "Click " + z);
+                        currIndex = z;
+                        currButton = (Button)la.findViewWithTag("Button"+z);
+                        builder.show();
+                    }
+                });
+                btnTag.setOnLongClickListener(new View.OnLongClickListener() {
+                    public boolean onLongClick(View v) {
+                        Log.i("TAG", "Long Click " + z);
+                        currIndex = z;
+                        currButton = (Button)la.findViewWithTag("Button"+z);
+                        deleteLetter(currIndex);
+                        return true;
+                    }
+                });
+                la.addView(btnTag);
+                lIndex++;
+            }
+
         }
     }
     public void randomWord()
@@ -238,6 +363,46 @@ public class MainActivity extends AppCompatActivity {
             rand = r.nextInt(max - min) + min;
 
             word = wordList.get(rand);
+        }
+    }
+
+    public class Counter extends CountDownTimer {
+        public Counter(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+        @Override
+        public void onFinish(){
+            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
+            Toast.makeText(MainActivity.this, "Time is up!", Toast.LENGTH_SHORT).show();
+            String scoreText = "Score : " + score;
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Game Over!")
+                    .setCancelable(false)
+                    .setMessage(scoreText)
+                    .setNeutralButton("Retry" , new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            retry = true;
+                            newGame();
+                        }
+                    }).setPositiveButton("New Game" , new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            newGame();
+                        }
+                    }).setNegativeButton("Exit" , new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finishAndRemoveTask();
+                        }
+                    }).show();
+
+
+        }
+        @Override
+        public void onTick(long millisUntilFinished){
+            if((millisUntilFinished / 1000) == 10)
+                Toast.makeText(mContext, "Ten Seconds!", Toast.LENGTH_SHORT).show();
+
+            Log.i("1/2 min counter: ", String.valueOf(millisUntilFinished / 1000));
         }
     }
 }

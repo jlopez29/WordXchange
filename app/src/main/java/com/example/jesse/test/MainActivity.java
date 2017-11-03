@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         return wordSet.contains(word);
     }
 
-    public boolean deleteLetter(int index)
+    public void deleteLetter(int index)
     {
         Log.i(TAG,"letter: " + currButton.getText());
         String newWord = "";
@@ -176,13 +176,10 @@ public class MainActivity extends AppCompatActivity {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
             la.setWeightSum(word.length());
             writeBoard();
-
-            return true;
         }
         else {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
             Log.i(TAG, "INVALID WORD");
-            return false;
         }
     }
 

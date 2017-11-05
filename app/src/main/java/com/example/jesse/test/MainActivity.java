@@ -4,8 +4,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -29,6 +32,7 @@ import java.util.Set;
 
 /**
  * Created by jesse on 11/1/2017.
+ * Main activity of wordXchange which deals with main game loop
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -108,10 +112,10 @@ public class MainActivity extends AppCompatActivity {
 
         usedWords.add(word);
 
-        la = (LinearLayout)findViewById(R.id.boardLayout);
+        la = findViewById(R.id.boardLayout);
         int sum = (word.length() * 2) + 1;
         la.setWeightSum(sum);
-        iv = (ImageView)findViewById(R.id.wordStatus);
+        iv = findViewById(R.id.wordStatus);
 
         builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Letters")
@@ -135,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 if((i % 2) != 0) {
                                     if (i != currIndex) {
-                                        Button b = (Button) la.findViewWithTag("Button" + i);
+                                        Button b = la.findViewWithTag("Button" + i);
                                         newWord += b.getText();
                                     } else
                                         newWord += alphabet[which];
@@ -145,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 if(((i % 2) != 0) || (i == currIndex)) {
                                     if (i != currIndex) {
-                                        Button b = (Button) la.findViewWithTag("Button" + i);
+                                        Button b = la.findViewWithTag("Button" + i);
                                         newWord += b.getText();
                                     } else
                                     {
@@ -164,6 +168,13 @@ public class MainActivity extends AppCompatActivity {
                             countDown.cancel();
                             countDown.start();
                             score++;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    TextView tv = findViewById(R.id.scoreValue);
+                                    tv.setText(Integer.toString(score));
+                                }
+                            });
                             word = newWord;
                             usedWords.add(word);
                             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
@@ -179,6 +190,13 @@ public class MainActivity extends AppCompatActivity {
                         }
                         else {
                             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
+                            Handler h = new Handler();
+                            h.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.green_check_mark,null));
+                                }
+                            },1500);
                             Log.i(TAG, "INVALID WORD");
                             if(usedWords.contains(newWord))
                                 Toast.makeText(MainActivity.this, "Duplicate Word!", Toast.LENGTH_SHORT).show();
@@ -198,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.i(TAG,"Original word: " + word);
 
-        Button resetBoard = (Button)findViewById(R.id.newBoard);
+        Button resetBoard = findViewById(R.id.newBoard);
 
         resetBoard.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -215,6 +233,13 @@ public class MainActivity extends AppCompatActivity {
         usedWords = new ArrayList<>();
         add = false;
         score = 0;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView tv = findViewById(R.id.scoreValue);
+                tv.setText(Integer.toString(score));
+            }
+        });
         deleteBoard();
         if(!retry)
         {
@@ -229,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
         writeBoard();
         iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
         retry = false;
+        countDown.cancel();
         countDown.start();
     }
 
@@ -237,11 +263,10 @@ public class MainActivity extends AppCompatActivity {
         return wordSet.contains(word);
     }
 
-    public void deleteLetter(int index)
+    public void deleteLetter()
     {
         Log.i(TAG,"letter: " + currButton.getText());
         String newWord = "";
-        ImageView iv = (ImageView)findViewById(R.id.wordStatus);
 
         int length = (word.length() * 2) + 1;
         for(int i = 0; i < length; i++)
@@ -250,32 +275,60 @@ public class MainActivity extends AppCompatActivity {
             {
                 if(i != currIndex)
                 {
-                    Button b = (Button)la.findViewWithTag("Button"+i);
+                    Button b = la.findViewWithTag("Button"+i);
                     newWord += b.getText();
                 }
             }
 
 
         }
+
+        final String finalNew = newWord;
         Log.i(TAG,"new word : " + newWord);
 
-        if(contains(newWord))
+        if(contains(newWord)&& !usedWords.contains(newWord))
         {
-            countDown.cancel();
-            countDown.start();
-            deleteBoard();
-            score++;
-            word = newWord;
-            Log.i(TAG,"VALID WORD");
-            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
-            int sum = (word.length() * 2) + 1;
-            la.setWeightSum(sum);
-            writeBoard();
+            currButton.setBackgroundColor(Color.RED);
+            Handler h = new Handler();
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    countDown.cancel();
+                    countDown.start();
+                    deleteBoard();
+                    score++;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView tv = findViewById(R.id.scoreValue);
+                            tv.setText(Integer.toString(score));
+                        }
+                    });
+                    word = finalNew;
+                    usedWords.add(word);
+                    Log.i(TAG,"VALID WORD");
+                    iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
+                    int sum = (word.length() * 2) + 1;
+                    la.setWeightSum(sum);
+                    writeBoard();
+                }
+            },750);
+
         }
         else {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
+            Handler h = new Handler();
+            h.postDelayed(new Runnable() {
+                  @Override
+                  public void run() {
+                            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.green_check_mark,null));
+                  }
+            },1500);
             Log.i(TAG, "INVALID WORD");
-            Toast.makeText(MainActivity.this, "Invalid Word!", Toast.LENGTH_SHORT).show();
+            if(usedWords.contains(newWord))
+                Toast.makeText(MainActivity.this, "Duplicate Word!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(MainActivity.this, "Invalid Word!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -285,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
         int length = (word.length() * 2) + 1;
         for(int i = 0; i < length; i++)
         {
-            Button b = (Button)la.findViewWithTag("Button" + i);
+            Button b = la.findViewWithTag("Button" + i);
             la.removeView(b);
         }
     }
@@ -311,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("TAG", "Click " + z);
                         add = true;
                         currIndex = z;
-                        currButton = (Button)la.findViewWithTag("Button"+z);
+                        currButton = la.findViewWithTag("Button"+z);
                         builder.show();
                     }
                 });
@@ -328,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Log.i("TAG", "Click " + z);
                         currIndex = z;
-                        currButton = (Button)la.findViewWithTag("Button"+z);
+                        currButton = la.findViewWithTag("Button"+z);
                         builder.show();
                     }
                 });
@@ -336,8 +389,8 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onLongClick(View v) {
                         Log.i("TAG", "Long Click " + z);
                         currIndex = z;
-                        currButton = (Button)la.findViewWithTag("Button"+z);
-                        deleteLetter(currIndex);
+                        currButton = la.findViewWithTag("Button"+z);
+                        deleteLetter();
                         return true;
                     }
                 });
@@ -366,8 +419,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class Counter extends CountDownTimer {
-        public Counter(long millisInFuture, long countDownInterval) {
+    class Counter extends CountDownTimer {
+        Counter(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
         }
         @Override

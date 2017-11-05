@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Xchange</string>
-
+    <string name="score">Score : </string>
+    <string name="initScore">0</string>
+    <string name="newBoard">New Board</string>
+    <string name="statusDescription">Displays word validity</string>
     <!-- Strings related to Settings -->
     <string name="title_activity_login">Sign in</string>
 

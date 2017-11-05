@@ -421,7 +421,6 @@ public class MainActivity extends AppCompatActivity {
 
         if(event.getAction() == KeyEvent.ACTION_UP)
         {
-            Log.i(TAG, "On dispatch key event up");
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_A:
                     Log.i(TAG, "A Pressed");
@@ -528,7 +527,9 @@ public class MainActivity extends AppCompatActivity {
                     chosenLetter = "z";
                     break;
                 default:
+                    Log.i(TAG,"Default press");
                     imm.hideSoftInputFromWindow(iv.getWindowToken(), 0);
+                    break;
             }
         }
 
@@ -593,7 +594,6 @@ public class MainActivity extends AppCompatActivity {
             {
 
                 scores[i] = prefs.getInt("score" + i,0);
-                Log.i(TAG," score " + i + " : " + scores[i]);
             }
 
             Arrays.sort(scores);
@@ -604,7 +604,6 @@ public class MainActivity extends AppCompatActivity {
                 {
                     if(score > scores[i])
                     {
-                        Log.i(TAG," high score: " + score + " > " + scores[i]);
                         prefs.edit().putInt("score" + i,score).apply();
                         highScore = true;
                         scores[i] = score;
@@ -642,6 +641,7 @@ public class MainActivity extends AppCompatActivity {
 
             if(highScore)
             {
+                Log.i(TAG,"High score");
                 Arrays.sort(scores, Collections.reverseOrder());
                 builder.setTitle("High Score!")
                         .setMessage(" 1.) " +scores[0] + "\n 2.) " + scores[1] + "\n 3.) " + scores[2])
@@ -649,6 +649,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else
             {
+                Log.i(TAG,"Game over");
                 builder.setTitle("Game Over!")
                         .setMessage(scoreText)
                         .show();
@@ -661,7 +662,7 @@ public class MainActivity extends AppCompatActivity {
             if((millisUntilFinished / 1000) == 10)
                 Toast.makeText(mContext, "Ten Seconds!", Toast.LENGTH_SHORT).show();
 
-            Log.i("1/2 min counter: ", String.valueOf(millisUntilFinished / 1000));
+            //Log.i("1/2 min counter: ", String.valueOf(millisUntilFinished / 1000));
         }
     }
 }

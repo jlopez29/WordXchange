@@ -246,15 +246,18 @@ public class MainActivity extends AppCompatActivity {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
             if(add)
             {
-                deleteBoard();
                 int sum = (word.length() * 2) + 1;
                 la.setWeightSum(sum);
-                writeBoard();
             }
             else
                 currButton.setText(letter);
+
+            deleteBoard();
+            writeBoard();
         }
         else {
+            deleteBoard();
+            writeBoard();
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
             Handler h = new Handler();
             h.postDelayed(new Runnable() {
@@ -394,6 +397,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("TAG", "Click " + z);
                         currIndex = z;
                         currButton = la.findViewWithTag("Button"+z);
+                        currButton.setBackgroundColor(Color.YELLOW);
                         //builder.show();
                         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
                     }
@@ -548,11 +552,11 @@ public class MainActivity extends AppCompatActivity {
     {
         Log.i(TAG,"On touch event");
         if(add)
-        {
-            deleteBoard();
-            writeBoard();
             add = false;
-        }
+
+        deleteBoard();
+        writeBoard();
+
         imm.hideSoftInputFromWindow(iv.getWindowToken(),0);
         return true;
     }

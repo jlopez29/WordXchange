@@ -3,17 +3,22 @@ package com.example.jesse.test;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -26,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -40,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     Set<String> wordSet;
     ArrayList<String> wordList;
     ArrayList<String> usedWords;
-    String[] alphabet = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+    Integer[] scores;
     Button currButton;
     int currIndex = 0;
     boolean add = false;
@@ -53,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     int score = 0;
     Counter countDown;
     Context mContext;
+    InputMethodManager imm;
+    SharedPreferences prefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,6 +117,12 @@ public class MainActivity extends AppCompatActivity {
             }
         usedWords = new ArrayList<>();
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        scores = new Integer[3];
+
+        imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
         randomWord();
         ogWord = word;
 
@@ -116,98 +132,6 @@ public class MainActivity extends AppCompatActivity {
         int sum = (word.length() * 2) + 1;
         la.setWeightSum(sum);
         iv = findViewById(R.id.wordStatus);
-
-        builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Letters")
-                .setItems(alphabet, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // The 'which' argument contains the index position
-                        // of the selected item
-                        Log.i(TAG,"letter: " + alphabet[which]);
-                        String newWord = "";
-
-                        int length = (word.length() * 2) + 1;
-
-                        if(add)
-                            Log.i(TAG,"Add letter");
-                        else
-                            Log.i(TAG,"Change letter");
-
-                        for(int i = 0; i < length; i++)
-                        {
-                            if(!add)
-                            {
-                                if((i % 2) != 0) {
-                                    if (i != currIndex) {
-                                        Button b = la.findViewWithTag("Button" + i);
-                                        newWord += b.getText();
-                                    } else
-                                        newWord += alphabet[which];
-                                }
-                            }
-                            else
-                            {
-                                if(((i % 2) != 0) || (i == currIndex)) {
-                                    if (i != currIndex) {
-                                        Button b = la.findViewWithTag("Button" + i);
-                                        newWord += b.getText();
-                                    } else
-                                    {
-                                        newWord += alphabet[which];
-                                    }
-
-                                }
-                            }
-
-                        }
-                        Log.i(TAG,"new word : " + newWord);
-
-                        if(contains(newWord) && !usedWords.contains(newWord))
-                        {
-                            Log.i(TAG,"VALID WORD");
-                            countDown.cancel();
-                            countDown.start();
-                            score++;
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    TextView tv = findViewById(R.id.scoreValue);
-                                    tv.setText(Integer.toString(score));
-                                }
-                            });
-                            word = newWord;
-                            usedWords.add(word);
-                            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
-                            if(add)
-                            {
-                                deleteBoard();
-                                int sum = (word.length() * 2) + 1;
-                                la.setWeightSum(sum);
-                                writeBoard();
-                            }
-                            else
-                                currButton.setText(alphabet[which]);
-                        }
-                        else {
-                            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
-                            Handler h = new Handler();
-                            h.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.green_check_mark,null));
-                                }
-                            },1500);
-                            Log.i(TAG, "INVALID WORD");
-                            if(usedWords.contains(newWord))
-                                Toast.makeText(MainActivity.this, "Duplicate Word!", Toast.LENGTH_SHORT).show();
-                            else
-                                Toast.makeText(MainActivity.this, "Invalid Word!", Toast.LENGTH_SHORT).show();
-                        }
-
-                        add = false;
-                    }
-                });
-
 
         writeBoard();
 
@@ -263,6 +187,92 @@ public class MainActivity extends AppCompatActivity {
         return wordSet.contains(word);
     }
 
+    public void validateWord(String letter)
+    {
+        Log.i(TAG,"letter: " + letter);
+        String newWord = "";
+
+        int length = (word.length() * 2) + 1;
+
+        if(add)
+            Log.i(TAG,"Add letter");
+        else
+            Log.i(TAG,"Change letter");
+
+        for(int i = 0; i < length; i++)
+        {
+            if(!add)
+            {
+                if((i % 2) != 0) {
+                    if (i != currIndex) {
+                        Button b = la.findViewWithTag("Button" + i);
+                        newWord += b.getText();
+                    } else
+                        newWord += letter;
+                }
+            }
+            else
+            {
+                if(((i % 2) != 0) || (i == currIndex)) {
+                    if (i != currIndex) {
+                        Button b = la.findViewWithTag("Button" + i);
+                        newWord += b.getText();
+                    } else
+                    {
+                        newWord += letter;
+                    }
+
+                }
+            }
+
+        }
+        Log.i(TAG,"new word : " + newWord);
+
+        if(contains(newWord) && !usedWords.contains(newWord))
+        {
+            Log.i(TAG,"VALID WORD");
+            countDown.cancel();
+            countDown.start();
+            score++;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    TextView tv = findViewById(R.id.scoreValue);
+                    tv.setText(Integer.toString(score));
+                }
+            });
+            word = newWord;
+            usedWords.add(word);
+            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
+            if(add)
+            {
+                deleteBoard();
+                int sum = (word.length() * 2) + 1;
+                la.setWeightSum(sum);
+                writeBoard();
+            }
+            else
+                currButton.setText(letter);
+        }
+        else {
+            iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
+            Handler h = new Handler();
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.green_check_mark,null));
+                }
+            },1750);
+            Log.i(TAG, "INVALID WORD");
+            if(usedWords.contains(newWord))
+                Toast.makeText(MainActivity.this, "Duplicate Word!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(MainActivity.this, "Invalid Word!", Toast.LENGTH_SHORT).show();
+        }
+
+        add = false;
+    }
+
     public void deleteLetter()
     {
         Log.i(TAG,"letter: " + currButton.getText());
@@ -312,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
                     la.setWeightSum(sum);
                     writeBoard();
                 }
-            },750);
+            },650);
 
         }
         else {
@@ -323,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
                   public void run() {
                             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.green_check_mark,null));
                   }
-            },1500);
+            },1750);
             Log.i(TAG, "INVALID WORD");
             if(usedWords.contains(newWord))
                 Toast.makeText(MainActivity.this, "Duplicate Word!", Toast.LENGTH_SHORT).show();
@@ -365,7 +375,9 @@ public class MainActivity extends AppCompatActivity {
                         add = true;
                         currIndex = z;
                         currButton = la.findViewWithTag("Button"+z);
-                        builder.show();
+                        currButton.setBackgroundColor(Color.YELLOW);
+                        //builder.show();
+                        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
                     }
                 });
                 la.addView(btnTag);
@@ -382,7 +394,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("TAG", "Click " + z);
                         currIndex = z;
                         currButton = la.findViewWithTag("Button"+z);
-                        builder.show();
+                        //builder.show();
+                        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
                     }
                 });
                 btnTag.setOnLongClickListener(new View.OnLongClickListener() {
@@ -400,6 +413,149 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+
+        String chosenLetter = "";
+
+        if(event.getAction() == KeyEvent.ACTION_UP)
+        {
+            Log.i(TAG, "On dispatch key event up");
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_A:
+                    Log.i(TAG, "A Pressed");
+                    chosenLetter = "a";
+                    break;
+                case KeyEvent.KEYCODE_B:
+                    Log.i(TAG, "B Pressed");
+                    chosenLetter = "b";
+                    break;
+                case KeyEvent.KEYCODE_C:
+                    Log.i(TAG, "C Pressed");
+                    chosenLetter = "c";
+                    break;
+                case KeyEvent.KEYCODE_D:
+                    Log.i(TAG, "D Pressed");
+                    chosenLetter = "d";
+                    break;
+                case KeyEvent.KEYCODE_E:
+                    Log.i(TAG, "E Pressed");
+                    chosenLetter = "e";
+                    break;
+                case KeyEvent.KEYCODE_F:
+                    Log.i(TAG, "F Pressed");
+                    chosenLetter = "f";
+                    break;
+                case KeyEvent.KEYCODE_G:
+                    Log.i(TAG, "G Pressed");
+                    chosenLetter = "g";
+                    break;
+                case KeyEvent.KEYCODE_H:
+                    Log.i(TAG, "H Pressed");
+                    chosenLetter = "h";
+                    break;
+                case KeyEvent.KEYCODE_I:
+                    Log.i(TAG, "I Pressed");
+                    chosenLetter = "i";
+                    break;
+                case KeyEvent.KEYCODE_J:
+                    Log.i(TAG, "J Pressed");
+                    chosenLetter = "j";
+                    break;
+                case KeyEvent.KEYCODE_K:
+                    Log.i(TAG, "K Pressed");
+                    chosenLetter = "k";
+                    break;
+                case KeyEvent.KEYCODE_L:
+                    Log.i(TAG, "L Pressed");
+                    chosenLetter = "l";
+                    break;
+                case KeyEvent.KEYCODE_M:
+                    Log.i(TAG, "M Pressed");
+                    chosenLetter = "m";
+                    break;
+                case KeyEvent.KEYCODE_N:
+                    Log.i(TAG, "N Pressed");
+                    chosenLetter = "n";
+                    break;
+                case KeyEvent.KEYCODE_O:
+                    Log.i(TAG, "O Pressed");
+                    chosenLetter = "o";
+                    break;
+                case KeyEvent.KEYCODE_P:
+                    Log.i(TAG, "P Pressed");
+                    chosenLetter = "p";
+                    break;
+                case KeyEvent.KEYCODE_Q:
+                    Log.i(TAG, "Q Pressed");
+                    chosenLetter = "q";
+                    break;
+                case KeyEvent.KEYCODE_R:
+                    Log.i(TAG, "R Pressed");
+                    chosenLetter = "r";
+                    break;
+                case KeyEvent.KEYCODE_S:
+                    Log.i(TAG, "S Pressed");
+                    chosenLetter = "s";
+                    break;
+                case KeyEvent.KEYCODE_T:
+                    Log.i(TAG, "T Pressed");
+                    chosenLetter = "t";
+                    break;
+                case KeyEvent.KEYCODE_U:
+                    Log.i(TAG, "U Pressed");
+                    chosenLetter = "u";
+                    break;
+                case KeyEvent.KEYCODE_V:
+                    Log.i(TAG, "V Pressed");
+                    chosenLetter = "v";
+                    break;
+                case KeyEvent.KEYCODE_W:
+                    Log.i(TAG, "W Pressed");
+                    chosenLetter = "w";
+                    break;
+                case KeyEvent.KEYCODE_X:
+                    Log.i(TAG, "X Pressed");
+                    chosenLetter = "x";
+                    break;
+                case KeyEvent.KEYCODE_Y:
+                    Log.i(TAG, "Y Pressed");
+                    chosenLetter = "y";
+                    break;
+                case KeyEvent.KEYCODE_Z:
+                    Log.i(TAG, "Z Pressed");
+                    chosenLetter = "z";
+                    break;
+                default:
+                    imm.hideSoftInputFromWindow(iv.getWindowToken(), 0);
+            }
+        }
+
+        imm.hideSoftInputFromWindow(iv.getWindowToken(),0);
+
+        if(!chosenLetter.equals("")) {
+            validateWord(chosenLetter);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        Log.i(TAG,"On touch event");
+        if(add)
+        {
+            deleteBoard();
+            writeBoard();
+            add = false;
+        }
+        imm.hideSoftInputFromWindow(iv.getWindowToken(),0);
+        return true;
+    }
+
     public void randomWord()
     {
         int min = 0;
@@ -428,11 +584,47 @@ public class MainActivity extends AppCompatActivity {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
             Toast.makeText(MainActivity.this, "Time is up!", Toast.LENGTH_SHORT).show();
             String scoreText = "Score : " + score;
+            scores = new Integer[3];
+            boolean highScore = false;
+
+            imm.hideSoftInputFromWindow(iv.getWindowToken(),0);
+
+            for(int i = 0; i < scores.length; i++)
+            {
+
+                scores[i] = prefs.getInt("score" + i,0);
+                Log.i(TAG," score " + i + " : " + scores[i]);
+            }
+
+            Arrays.sort(scores);
+
+            for(int i = 0; i < scores.length; i++)
+            {
+                if(!highScore && score > 0)
+                {
+                    if(score > scores[i])
+                    {
+                        Log.i(TAG," high score: " + score + " > " + scores[i]);
+                        prefs.edit().putInt("score" + i,score).apply();
+                        highScore = true;
+                        scores[i] = score;
+                    }
+                }
+            }
+
+            Arrays.sort(scores);
+
+            for(int i = 0; i < scores.length; i++)
+            {
+
+                prefs.edit().putInt("score" + i,scores[i]).apply();
+                Log.i(TAG," score " + i + " : " + scores[i]);
+            }
+
+
 
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("Game Over!")
-                    .setCancelable(false)
-                    .setMessage(scoreText)
+            builder .setCancelable(false)
                     .setNeutralButton("Retry" , new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             retry = true;
@@ -446,7 +638,21 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             finishAndRemoveTask();
                         }
-                    }).show();
+                    });
+
+            if(highScore)
+            {
+                Arrays.sort(scores, Collections.reverseOrder());
+                builder.setTitle("High Score!")
+                        .setMessage(" 1.) " +scores[0] + "\n 2.) " + scores[1] + "\n 3.) " + scores[2])
+                        .show();
+            }
+            else
+            {
+                builder.setTitle("Game Over!")
+                        .setMessage(scoreText)
+                        .show();
+            }
 
 
         }

@@ -1,6 +1,6 @@
-[![N|Solid](http://fo.ucf.edu/sites/default/files/images/Events.jpg)](https://nodesource.com/products/nsolid)
+[![N|Solid](http://fo.ucf.edu/sites/default/files/images/Events.jpg)]
 ###
-[![N|Solid](http://www.ucf.edu/brand/files/2016/07/UCF-Tab-Signature-lockup_horizontal-KG-7406-300x72.png)](https://nodesource.com/products/nsolid)
+[![N|Solid](http://www.ucf.edu/brand/files/2016/07/UCF-Tab-Signature-lockup_horizontal-KG-7406-300x72.png)]
 ##
 # Android App - wordXchange <img src="https://i.imgur.com/LDRfJrB.png" alt="App Icon" style="width: 75px;"/>
 

@@ -4,7 +4,7 @@
 ##
 # Android App - wordXchange ![App Icon](https://i.imgur.com/LDRfJrB.png)
 
-![Android Banner](http://thewallpaper.co/wp-content/uploads/2016/10/Android-phone-logo-images-desktop-wallpapers-background-images-free-4k-hd-pictures-tablet-smart-phone-1920x1080-768x432.jpg)
+<img src="http://thewallpaper.co/wp-content/uploads/2016/10/Android-phone-logo-images-desktop-wallpapers-background-images-free-4k-hd-pictures-tablet-smart-phone-1920x1080-768x432.jpg" alt="Android Banner" style="width: px;"/>
 
 ## Instructions
 - Tap on a letter to change the current word to another valid word

@@ -19,7 +19,7 @@
 ![App Icon](https://i.imgur.com/zfWPrCB.png)
 ##
 ## Gameplay Video
-<a href="https://www.youtube.com/watch?v=iF4YQgcbbWc
+<a href="https://www.youtube.com/watch?v=pBsdPi8wEMY
 " target="_blank"><img src="http://cdn.osxdaily.com/wp-content/uploads/2016/10/YouTube-icon-full_color-610x430.png"
 alt="Gameplay" width="240" height="180" border="10" /></a>
 ##

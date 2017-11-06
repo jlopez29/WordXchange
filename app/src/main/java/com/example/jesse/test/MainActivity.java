@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
         writeBoard();
 
-        countDown = new Counter(30000,1000);
+        countDown = new Counter(15000,1000);
         countDown.start();
 
         Log.i(TAG,"Original word: " + word);
@@ -544,7 +544,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        return false;
+        return super.dispatchKeyEvent(event);
     }
 
     @Override
@@ -663,10 +663,33 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         public void onTick(long millisUntilFinished){
-            if((millisUntilFinished / 1000) == 10)
-                Toast.makeText(mContext, "Ten Seconds!", Toast.LENGTH_SHORT).show();
+            if((millisUntilFinished / 1000) == 5)
+                Toast.makeText(mContext, "Five Seconds!", Toast.LENGTH_SHORT).show();
 
             //Log.i("1/2 min counter: ", String.valueOf(millisUntilFinished / 1000));
         }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.i("ONDESTROY", "**************STARTED*************");
+
+        usedWords = new ArrayList<>();
+        add = false;
+        score = 0;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView tv = findViewById(R.id.scoreValue);
+                tv.setText(Integer.toString(score));
+            }
+        });
+        deleteBoard();
+        retry = false;
+        countDown.cancel();
+
     }
 }

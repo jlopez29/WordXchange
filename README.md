@@ -17,6 +17,10 @@
 ##
 ## Screenshot
 ![App Icon](https://i.imgur.com/zfWPrCB.png)
+![Sign in page](https://i.imgur.com/hsDWuwg.png)
+![Sign in prompt](https://i.imgur.com/pqiIAUG.png)
+![Change letter](https://https://i.imgur.com/B7Noe9C.png)
+![Delete letter](https://i.imgur.com/yvvfxxh.png)
 ##
 ## Gameplay Video
 <a href="https://www.youtube.com/watch?v=pBsdPi8wEMY

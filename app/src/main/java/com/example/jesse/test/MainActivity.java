@@ -380,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
                         currButton = la.findViewWithTag("Button"+z);
                         currButton.setBackgroundColor(Color.YELLOW);
                         //builder.show();
-                        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
+                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
                     }
                 });
                 la.addView(btnTag);
@@ -399,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
                         currButton = la.findViewWithTag("Button"+z);
                         currButton.setBackgroundColor(Color.YELLOW);
                         //builder.show();
-                        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
+                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
                     }
                 });
                 btnTag.setOnLongClickListener(new View.OnLongClickListener() {

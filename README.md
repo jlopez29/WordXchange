@@ -16,9 +16,10 @@
 * Programmed in Java using Android Studio 3.0
 ##
 ## Screenshot
-![App Icon](https://i.imgur.com/zfWPrCB.png)
+
 ![Sign in page](https://i.imgur.com/hsDWuwg.png)
 ![Sign in prompt](https://i.imgur.com/pqiIAUG.png)
+![Game board](https://i.imgur.com/zfWPrCB.png)
 ![Change letter](https://i.imgur.com/B7Noe9C.png)
 ![Delete letter](https://i.imgur.com/yvvfxxh.png)
 ##

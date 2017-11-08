@@ -830,6 +830,7 @@ public class MainActivity extends AppCompatActivity implements
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
+                        Toast.makeText(mContext, "Logged out successfully.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

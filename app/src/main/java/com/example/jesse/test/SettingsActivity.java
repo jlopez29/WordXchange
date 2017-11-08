@@ -50,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
             {
                 if(key.equals("timerPref"))
                 {
-                    prefs.edit().putString("musicSelected",prefs.getString("musicPref","Google Play")).apply();
+                    prefs.edit().putString("timerSelected",prefs.getString("timerPref","30")).apply();
                 }
             }
         }

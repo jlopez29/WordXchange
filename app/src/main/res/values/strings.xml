@@ -95,10 +95,11 @@
     <string name="id_fmt">User ID: %s</string>
     <string name="email_fmt">Email: %s</string>
 
-    <string-array name="timerCount">Music Player>
+    <string-array name="timerCount">Timer Countdown>
         <item>15</item>
         <item>30</item>
         <item>60</item>
     </string-array>
+
 
 </resources>

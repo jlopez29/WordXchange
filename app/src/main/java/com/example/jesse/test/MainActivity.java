@@ -47,7 +47,7 @@ import java.util.Set;
  */
 
 public class MainActivity extends AppCompatActivity {
-    String TAG = "*** Main ***";
+    String TAG = "*** Xchange -  Main ***";
     Set<String> wordSet;
     ArrayList<String> wordList;
     ArrayList<String> usedWords;
@@ -66,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
     Context mContext;
     InputMethodManager imm;
     SharedPreferences prefs;
+    boolean paused = false;
+    boolean checkTimer = false;
+    int time;
+    long currTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         */
 
         // Toolbar that contains drop down settings icon
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitleTextColor(Color.WHITE);
         myToolbar.showOverflowMenu();
         setSupportActionBar(myToolbar);
@@ -144,8 +148,9 @@ public class MainActivity extends AppCompatActivity {
         iv = findViewById(R.id.wordStatus);
 
         writeBoard();
-
-        countDown = new Counter(15000,1000);
+        time = Integer.valueOf(prefs.getString("timerPref","30"));
+        time = time * 1000;
+        countDown = new Counter(time,1000);
         countDown.start();
 
         Log.i(TAG,"Original word: " + word);
@@ -188,7 +193,8 @@ public class MainActivity extends AppCompatActivity {
         writeBoard();
         iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
         retry = false;
-        countDown.cancel();
+
+        countDown = new Counter(time,1000);
         countDown.start();
     }
 
@@ -675,8 +681,8 @@ public class MainActivity extends AppCompatActivity {
         public void onTick(long millisUntilFinished){
             if((millisUntilFinished / 1000) == 5)
                 Toast.makeText(mContext, "Five Seconds!", Toast.LENGTH_SHORT).show();
-
-            //Log.i("1/2 min counter: ", String.valueOf(millisUntilFinished / 1000));
+            currTime = millisUntilFinished;
+            Log.i("1/2 min counter: ", String.valueOf(millisUntilFinished / 1000));
         }
     }
 
@@ -703,6 +709,49 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG,"*** On Resume ***");
+        if(paused) {
+            if (checkTimer) {
+                int newTime = Integer.valueOf(prefs.getString("timerPref", "30"));
+                newTime *= 1000;
+
+                if (newTime != time) {
+
+                    if(currTime > newTime)
+                        countDown = new Counter(newTime,1000);
+                    else
+                        countDown = new Counter(currTime,1000);
+
+                    time = newTime;
+                    countDown.start();
+                }
+                else
+                {
+                    countDown = new Counter(currTime,1000);
+                    countDown.start();
+                    paused = false;
+                }
+                checkTimer = false;
+            } else
+            {
+                countDown = new Counter(currTime,1000);
+                countDown.start();
+                paused = false;
+            }
+
+        }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.e(TAG,"*** On Pause ***");
+        countDown.cancel();
+        paused = true;
+    }
+
     // Handles the drop down settings menu and what activity to start when an item is pressed
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -710,6 +759,8 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.settings:
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                countDown.cancel();
+                checkTimer = true;
                 startActivity(settingsIntent);
                 return true;
             default:

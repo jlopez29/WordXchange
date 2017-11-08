@@ -6,7 +6,7 @@
     tools:context=".ModeActivity">
 
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="2"
         android:entries="@array/timerCount"
         android:entryValues="@array/timerCount"
         android:key="timerPref"

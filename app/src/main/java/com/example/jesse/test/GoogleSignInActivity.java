@@ -1,5 +1,6 @@
 package com.example.jesse.test;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -44,10 +45,14 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     private TextView mDetailTextView;
     boolean startup = false;
 
+    public static Context gContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google);
+
+        gContext = this;
 
         // Views
         mStatusTextView = findViewById(R.id.status);
@@ -167,19 +172,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                 });
     }
 
-    private void revokeAccess() {
-        // Firebase sign out
-        mAuth.signOut();
 
-        // Google revoke access
-        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        updateUI(null);
-                    }
-                });
-    }
 
     private void updateUI(FirebaseUser user) {
         //hideProgressDialog();

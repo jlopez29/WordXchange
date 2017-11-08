@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,36 +49,46 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-
 /**
  * Created by jesse on 11/1/2017.
  * Main activity of wordXchange which deals with main game loop
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener {
+
     String TAG = "*** Xchange -  Main ***";
-    Set<String> wordSet;
-    ArrayList<String> wordList;
-    ArrayList<String> usedWords;
-    Integer[] scores;
-    Button currButton;
-    int currIndex = 0;
-    boolean add = false;
     String word;
     String ogWord;
+
     boolean retry = false;
+    boolean paused = false;
+    boolean checkTimer = false;
+    boolean add = false;
+
     LinearLayout la;
-    AlertDialog.Builder builder;
     ImageView iv;
-    int score = 0;
+    Button currButton;
+
     Counter countDown;
     Context mContext;
     InputMethodManager imm;
     SharedPreferences prefs;
-    boolean paused = false;
-    boolean checkTimer = false;
+
     int time;
+    int currIndex = 0;
+    int score = 0;
     long currTime;
+    Integer[] scores;
+
+    Set<String> wordSet;
+    ArrayList<String> wordList;
+    ArrayList<String> usedWords;
+
+
+    private FirebaseAuth mAuth;
+
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +120,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
         */
+        mAuth = FirebaseAuth.getInstance();
+
+        // [START config_signin]
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("511509615982-5vtr0d19ojg9dfn9p13bf77nrj0eopab.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+        // [END config_signin]
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this/* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
 
         // Toolbar that contains drop down settings icon
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
@@ -763,6 +796,11 @@ public class MainActivity extends AppCompatActivity {
                 checkTimer = true;
                 startActivity(settingsIntent);
                 return true;
+            case R.id.logout:
+                countDown.cancel();
+                revokeAccess();
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -773,5 +811,26 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
+        // be available.
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
+        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+    }
+
+    public void revokeAccess() {
+        // Firebase sign out
+        mAuth.signOut();
+
+        // Google revoke access
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                    }
+                });
     }
 }

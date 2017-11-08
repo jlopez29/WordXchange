@@ -54,8 +54,7 @@ import java.util.Set;
  * Main activity of wordXchange which deals with main game loop
  */
 
-public class MainActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity {
 
     String TAG = "*** Xchange -  Main ***";
     String word;
@@ -85,16 +84,16 @@ public class MainActivity extends AppCompatActivity implements
     ArrayList<String> wordList;
     ArrayList<String> usedWords;
 
+    public static boolean logout = false;
 
-    private FirebaseAuth mAuth;
-
-    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e(TAG,"*** OnCreate ***");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
+
         /*
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -120,20 +119,6 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         */
-        mAuth = FirebaseAuth.getInstance();
-
-        // [START config_signin]
-        // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("511509615982-5vtr0d19ojg9dfn9p13bf77nrj0eopab.apps.googleusercontent.com")
-                .requestEmail()
-                .build();
-        // [END config_signin]
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this/* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
 
         // Toolbar that contains drop down settings icon
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
@@ -724,10 +709,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onDestroy() {
         super.onDestroy();
 
-        Log.i("ONDESTROY", "**************STARTED*************");
+        Log.e("ONDESTROY", "**************STARTED*************");
 
         usedWords = new ArrayList<>();
         add = false;
+        paused = false;
+        checkTimer = false;
         score = 0;
         runOnUiThread(new Runnable() {
             @Override
@@ -797,9 +784,10 @@ public class MainActivity extends AppCompatActivity implements
                 startActivity(settingsIntent);
                 return true;
             case R.id.logout:
-                countDown.cancel();
-                revokeAccess();
+
+                Log.e(TAG,"*** Logout ***");
                 finish();
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -811,27 +799,5 @@ public class MainActivity extends AppCompatActivity implements
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
-    }
-
-    public void revokeAccess() {
-        // Firebase sign out
-        mAuth.signOut();
-
-        // Google revoke access
-        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        Toast.makeText(mContext, "Logged out successfully.", Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 }

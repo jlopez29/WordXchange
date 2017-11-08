@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import static com.example.jesse.test.MainActivity.logout;
+
 /**
  * Demonstrate Firebase Authentication using a Google ID Token.
  */
@@ -43,12 +46,14 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
     private TextView mDetailTextView;
-    boolean startup = false;
+    public static boolean startup = false;
 
     public static Context gContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.e(TAG,"*** OnCreate ***");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google);
 
@@ -151,6 +156,20 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     }
     // [END auth_with_google]
 
+    private void revokeAccess() {
+        // Firebase sign out
+        mAuth.signOut();
+
+        // Google revoke access
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        updateUI(null);
+                    }
+                });
+    }
+
     // [START signin]
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
@@ -183,13 +202,6 @@ public class GoogleSignInActivity extends AppCompatActivity implements
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
 
-            if(!startup)
-            {
-                startup = true;
-                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(i);
-            }
-
         } else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);
@@ -215,6 +227,12 @@ public class GoogleSignInActivity extends AppCompatActivity implements
         } else if (i == R.id.sign_out_button) {
             signOut();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG,"*** On Resume ***");
     }
 }
 

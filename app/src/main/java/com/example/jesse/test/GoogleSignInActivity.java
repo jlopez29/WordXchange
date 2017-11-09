@@ -3,11 +3,13 @@ package com.example.jesse.test;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,6 +84,12 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
+
+        if(mAuth.getCurrentUser() != null)
+        {
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
+        }
         // [END initialize_auth]
     }
 
@@ -90,8 +98,13 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
+
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
+
         updateUI(currentUser);
+
+
     }
     // [END on_start_check_user]
 
@@ -119,9 +132,9 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
     // [START auth_with_google]
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        Log.e(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         // [START_EXCLUDE silent]
-        //showProgressDialog();
+        showProgressDialog();
         // [END_EXCLUDE]
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -131,14 +144,12 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
-
-                            //finish();
+                            Log.e(TAG, "signInWithCredential:success");
 
                             Intent i = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(i);
+
+                            updateUI(mAuth.getCurrentUser());
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -149,7 +160,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                         }
 
                         // [START_EXCLUDE]
-                        //hideProgressDialog();
+                        hideProgressDialog();
                         // [END_EXCLUDE]
                     }
                 });
@@ -194,7 +205,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
 
     private void updateUI(FirebaseUser user) {
-        //hideProgressDialog();
+        hideProgressDialog();
         if (user != null) {
             mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
             mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
@@ -233,6 +244,34 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     public void onResume() {
         super.onResume();
         Log.e(TAG,"*** On Resume ***");
+        if(logout)
+        {
+            Handler h = new Handler();
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    signOut();
+                    logout = false;
+                }
+            },150);
+
+        }
+    }
+
+    public void showProgressDialog()
+    {
+        RelativeLayout rl = findViewById(R.id.progressLayout);
+
+        rl.setVisibility(View.VISIBLE);
+
+    }
+
+    public void hideProgressDialog()
+    {
+        RelativeLayout rl = findViewById(R.id.progressLayout);
+
+        rl.setVisibility(View.GONE);
+
     }
 }
 

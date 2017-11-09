@@ -782,16 +782,19 @@ public class MainActivity extends AppCompatActivity {
                 countDown.cancel();
                 checkTimer = true;
                 startActivity(settingsIntent);
-                return true;
+                break;
             case R.id.logout:
 
                 Log.e(TAG,"*** Logout ***");
+                logout = true;
                 finish();
 
-                return true;
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
+
+        return true;
     }
     // Creates menu to crete drop down settings menu
     @Override

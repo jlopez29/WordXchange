@@ -50,16 +50,12 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     private TextView mDetailTextView;
     public static boolean startup = false;
 
-    public static Context gContext;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Log.e(TAG,"*** OnCreate ***");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google);
-
-        gContext = this;
 
         // Views
         mStatusTextView = findViewById(R.id.status);
@@ -87,8 +83,14 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
         if(mAuth.getCurrentUser() != null)
         {
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(i);
+            Intent mIntent = getIntent();
+            Boolean start = mIntent.getBooleanExtra("startup",true);
+
+            if(start)
+            {
+                Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(i);
+            }
         }
         // [END initialize_auth]
     }
@@ -134,7 +136,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.e(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         // [START_EXCLUDE silent]
-        showProgressDialog();
+//        showProgressDialog();
         // [END_EXCLUDE]
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -151,6 +153,8 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
                             updateUI(mAuth.getCurrentUser());
 
+                            finish();
+
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -160,7 +164,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                         }
 
                         // [START_EXCLUDE]
-                        hideProgressDialog();
+//                        hideProgressDialog();
                         // [END_EXCLUDE]
                     }
                 });
@@ -205,7 +209,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
 
     private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
+//        hideProgressDialog();
         if (user != null) {
             mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
             mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
@@ -253,25 +257,9 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                     signOut();
                     logout = false;
                 }
-            },150);
+            },200);
 
         }
-    }
-
-    public void showProgressDialog()
-    {
-        RelativeLayout rl = findViewById(R.id.progressLayout);
-
-        rl.setVisibility(View.VISIBLE);
-
-    }
-
-    public void hideProgressDialog()
-    {
-        RelativeLayout rl = findViewById(R.id.progressLayout);
-
-        rl.setVisibility(View.GONE);
-
     }
 }
 

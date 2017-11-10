@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 /**
@@ -194,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 TextView tv = findViewById(R.id.scoreValue);
-                tv.setText(Integer.toString(score));
+                tv.setText(String.format(Locale.getDefault(),"%d", score));
             }
         });
         deleteBoard();
@@ -233,6 +234,9 @@ public class MainActivity extends AppCompatActivity {
         else
             Log.i(TAG,"Change letter");
 
+
+        StringBuilder sb = new StringBuilder();
+
         for(int i = 0; i < length; i++)
         {
             if(!add)
@@ -240,9 +244,9 @@ public class MainActivity extends AppCompatActivity {
                 if((i % 2) != 0) {
                     if (i != currIndex) {
                         Button b = la.findViewWithTag("Button" + i);
-                        newWord += b.getText();
+                        newWord = sb.append(b.getText()).toString();
                     } else
-                        newWord += letter;
+                        newWord = sb.append(letter).toString();
                 }
             }
             else
@@ -250,10 +254,10 @@ public class MainActivity extends AppCompatActivity {
                 if(((i % 2) != 0) || (i == currIndex)) {
                     if (i != currIndex) {
                         Button b = la.findViewWithTag("Button" + i);
-                        newWord += b.getText();
+                        newWord = sb.append(b.getText()).toString();
                     } else
                     {
-                        newWord += letter;
+                        newWord = sb.append(letter).toString();
                     }
 
                 }
@@ -272,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     TextView tv = findViewById(R.id.scoreValue);
-                    tv.setText(Integer.toString(score));
+                    tv.setText(String.format(Locale.getDefault(),"%d", score));
                 }
             });
             word = newWord;
@@ -315,6 +319,8 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG,"letter: " + currButton.getText());
         String newWord = "";
 
+        StringBuilder sb = new StringBuilder();
+
         int length = (word.length() * 2) + 1;
         for(int i = 0; i < length; i++)
         {
@@ -323,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
                 if(i != currIndex)
                 {
                     Button b = la.findViewWithTag("Button"+i);
-                    newWord += b.getText();
+                    newWord = sb.append(b.getText()).toString();
                 }
             }
 
@@ -348,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             TextView tv = findViewById(R.id.scoreValue);
-                            tv.setText(Integer.toString(score));
+                            tv.setText(String.format(Locale.getDefault(),"%d", score));
                         }
                     });
                     word = finalNew;
@@ -720,7 +726,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 TextView tv = findViewById(R.id.scoreValue);
-                tv.setText(Integer.toString(score));
+                tv.setText(String.format(Locale.getDefault(),"%d", score));
             }
         });
         deleteBoard();
@@ -787,8 +793,12 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.e(TAG,"*** Logout ***");
                 logout = true;
-                finish();
 
+                Intent login = new Intent(this,GoogleSignInActivity.class);
+                login.putExtra("startup",false);
+                startActivity(login);
+
+                finish();
                 break;
             default:
                 return super.onOptionsItemSelected(item);

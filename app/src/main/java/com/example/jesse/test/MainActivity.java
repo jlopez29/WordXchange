@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
         iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.green_check_mark, null));
         retry = false;
 
+        countDown.cancel();
         countDown = new Counter(time,1000);
         countDown.start();
     }

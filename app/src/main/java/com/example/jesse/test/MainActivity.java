@@ -38,6 +38,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -85,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> wordList;
     ArrayList<String> usedWords;
 
+    FirebaseDatabase database;
+    DatabaseReference myRef;
+
     public static boolean logout = false;
 
 
@@ -95,12 +103,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mContext = this;
 
-        /*
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("scores");
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        /*
         DatabaseReference myRef = database.getReference("message");
 
         myRef.setValue("Hello, World!");
+
+*/
+
+        scores = new Integer[3];
 
         // Read from the database
         myRef.addValueEventListener(new ValueEventListener() {
@@ -108,8 +121,16 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                String value = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "Value is: " + value);
+                Object o = dataSnapshot.child("1").getValue();
+                scores[2] = Integer.valueOf(o.toString());
+                Log.d(TAG, "Value 1 is: " + scores[2]);
+                Object o1 = dataSnapshot.child("2").getValue();
+                scores[1] = Integer.valueOf(o1.toString());
+                Log.d(TAG, "Value 2 is: " + scores[1]);
+                Object o2 = dataSnapshot.child("3").getValue();
+                scores[0] = Integer.valueOf(o2.toString());
+                Log.d(TAG, "Value 3 is: " + scores[0]);
+
             }
 
             @Override
@@ -118,8 +139,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
-
-        */
 
         // Toolbar that contains drop down settings icon
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
@@ -152,8 +171,6 @@ public class MainActivity extends AppCompatActivity {
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        scores = new Integer[3];
-
         imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         randomWord();
@@ -169,6 +186,9 @@ public class MainActivity extends AppCompatActivity {
         writeBoard();
         time = Integer.valueOf(prefs.getString("timerPref","30"));
         time = time * 1000;
+
+        Log.i(TAG,"Original time: " + time);
+
         countDown = new Counter(time,1000);
         countDown.start();
 
@@ -629,52 +649,41 @@ public class MainActivity extends AppCompatActivity {
         public void onFinish(){
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
             Toast.makeText(MainActivity.this, "Time is up!", Toast.LENGTH_SHORT).show();
-            String scoreText = "Score : " + score;
+            final String scoreText = "Score : " + score;
             scores = new Integer[3];
-            boolean highScore = false;
+            final boolean highScore = false;
 
             imm.hideSoftInputFromWindow(iv.getWindowToken(),0);
 
-            for(int i = 0; i < scores.length; i++)
-            {
+            Handler h = new Handler();
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
 
-                scores[i] = prefs.getInt("score" + i,0);
-            }
-
-            Arrays.sort(scores);
-
-            for(int i = 0; i < scores.length; i++)
-            {
-                if(!highScore && score > 0)
-                {
-                    if(score > scores[i])
+                    for(int i = 0; i < scores.length; i++)
                     {
-                        prefs.edit().putInt("score" + i,score).apply();
-                        highScore = true;
-                        scores[i] = score;
-                    }
-                }
-            }
-
-            Arrays.sort(scores);
-
-            for(int i = 0; i < scores.length; i++)
-            {
-
-                prefs.edit().putInt("score" + i,scores[i]).apply();
-                Log.i(TAG," score " + i + " : " + scores[i]);
-            }
-
-
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder .setCancelable(false)
-                    .setNeutralButton("Retry" , new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            retry = true;
-                            newGame();
+                        if(!highScore && score > 0)
+                        {
+                            if(score > scores[i])
+                            {
+                                myRef.child(String.valueOf(i)).setValue(score);
+                            }
                         }
-                    }).setPositiveButton("New Game" , new DialogInterface.OnClickListener() {
+                    }
+
+                    for(int i = 0; i < scores.length; i++)
+                    {
+                        Log.i(TAG," score " + i + " : " + scores[i]);
+                    }
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder .setCancelable(false)
+                            .setNeutralButton("Retry" , new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    retry = true;
+                                    newGame();
+                                }
+                            }).setPositiveButton("New Game" , new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             newGame();
                         }
@@ -684,22 +693,23 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-            if(highScore)
-            {
-                Log.i(TAG,"High score");
-                Arrays.sort(scores, Collections.reverseOrder());
-                builder.setTitle("High Score!")
-                        .setMessage(" 1.) " +scores[0] + "\n 2.) " + scores[1] + "\n 3.) " + scores[2])
-                        .show();
-            }
-            else
-            {
-                Log.i(TAG,"Game over");
-                builder.setTitle("Game Over!")
-                        .setMessage(scoreText)
-                        .show();
-            }
+                    if(highScore)
+                    {
+                        Log.i(TAG,"High score");
+                        builder.setTitle("High Score!")
+                                .setMessage(" 1.) " +scores[2] + "\n 2.) " + scores[1] + "\n 3.) " + scores[0])
+                                .show();
+                    }
+                    else
+                    {
+                        Log.i(TAG,"Game over");
+                        builder.setTitle("Game Over!")
+                                .setMessage(scoreText)
+                                .show();
+                    }
 
+                }
+            },500);
 
         }
         @Override
@@ -732,7 +742,7 @@ public class MainActivity extends AppCompatActivity {
         });
         deleteBoard();
         retry = false;
-        countDown.cancel();
+        countDown = null;
 
     }
 
@@ -813,5 +823,10 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+    public void writeHighScore(int hScore, int spot)
+    {
+        myRef.child(Integer.toString(spot)).setValue(hScore);
     }
 }

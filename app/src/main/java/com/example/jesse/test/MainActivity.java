@@ -436,6 +436,8 @@ public class MainActivity extends AppCompatActivity {
                 btnTag.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Log.i("TAG", "Click " + z);
+                        deleteBoard();
+                        writeBoard();
                         currIndex = z;
                         currButton = la.findViewWithTag("Button"+z);
                         currButton.setBackgroundColor(Color.YELLOW);

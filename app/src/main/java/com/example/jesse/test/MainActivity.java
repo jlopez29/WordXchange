@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> wordList;
     ArrayList<String> usedWords;
 
+    boolean keyboardShowing = false;
+
     public static boolean logout = false;
 
 
@@ -168,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
         writeBoard();
         time = Integer.valueOf(prefs.getString("timerPref","30"));
+        Log.e(TAG,"time = " + time);
         time = time * 1000;
         countDown = new Counter(time,1000);
         countDown.start();
@@ -190,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("New Game","Entered");
         usedWords = new ArrayList<>();
         add = false;
+        keyboardShowing = false;
         score = 0;
         runOnUiThread(new Runnable() {
             @Override
@@ -227,6 +231,8 @@ public class MainActivity extends AppCompatActivity {
     {
         Log.i(TAG,"letter: " + letter);
         String newWord = "";
+
+        keyboardShowing = false;
 
         int length = (word.length() * 2) + 1;
 
@@ -421,7 +427,11 @@ public class MainActivity extends AppCompatActivity {
                         currButton = la.findViewWithTag("Button"+z);
                         currButton.setBackgroundColor(Color.YELLOW);
                         //builder.show();
-                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+                        if(!keyboardShowing)
+                            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
+
+                        keyboardShowing = true;
                     }
                 });
                 la.addView(btnTag);
@@ -442,7 +452,11 @@ public class MainActivity extends AppCompatActivity {
                         currButton = la.findViewWithTag("Button"+z);
                         currButton.setBackgroundColor(Color.YELLOW);
                         //builder.show();
-                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+                        if(!keyboardShowing)
+                            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
+
+                        keyboardShowing = true;
                     }
                 });
                 btnTag.setOnLongClickListener(new View.OnLongClickListener() {
@@ -593,9 +607,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        Log.i(TAG,"On touch event");
+        Log.e(TAG,"On touch event");
+
         if(add)
             add = false;
+        
+        if(keyboardShowing)
+            keyboardShowing = false;
 
         deleteBoard();
         writeBoard();
@@ -723,6 +741,7 @@ public class MainActivity extends AppCompatActivity {
         usedWords = new ArrayList<>();
         add = false;
         paused = false;
+        keyboardShowing = false;
         checkTimer = false;
         score = 0;
         runOnUiThread(new Runnable() {
@@ -766,7 +785,11 @@ public class MainActivity extends AppCompatActivity {
                 checkTimer = false;
             } else
             {
-                countDown = new Counter(currTime,1000);
+                if(currTime != 0)
+                    countDown = new Counter(currTime,1000);
+                else
+                    countDown = new Counter(time,1000);
+
                 countDown.start();
                 paused = false;
             }

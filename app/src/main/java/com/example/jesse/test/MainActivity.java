@@ -121,13 +121,13 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                Object o = dataSnapshot.child("1").getValue();
+                Object o = dataSnapshot.child("0").getValue();
                 scores[2] = Integer.valueOf(o.toString());
                 Log.d(TAG, "Value 1 is: " + scores[2]);
-                Object o1 = dataSnapshot.child("2").getValue();
+                Object o1 = dataSnapshot.child("1").getValue();
                 scores[1] = Integer.valueOf(o1.toString());
                 Log.d(TAG, "Value 2 is: " + scores[1]);
-                Object o2 = dataSnapshot.child("3").getValue();
+                Object o2 = dataSnapshot.child("2").getValue();
                 scores[0] = Integer.valueOf(o2.toString());
                 Log.d(TAG, "Value 3 is: " + scores[0]);
 
@@ -196,6 +196,10 @@ public class MainActivity extends AppCompatActivity {
 
         Button resetBoard = findViewById(R.id.newBoard);
 
+        Log.d(TAG, "Value 1 is: " + scores[2]);
+        Log.d(TAG, "Value 2 is: " + scores[1]);
+        Log.d(TAG, "Value 3 is: " + scores[0]);
+
         resetBoard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -245,6 +249,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void validateWord(String letter)
     {
+        Log.d(TAG, "Value 1 is: " + scores[2]);
+        Log.d(TAG, "Value 2 is: " + scores[1]);
+        Log.d(TAG, "Value 3 is: " + scores[0]);
+
         Log.i(TAG,"letter: " + letter);
         String newWord = "";
 
@@ -650,66 +658,62 @@ public class MainActivity extends AppCompatActivity {
             iv.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.red_x_mark, null));
             Toast.makeText(MainActivity.this, "Time is up!", Toast.LENGTH_SHORT).show();
             final String scoreText = "Score : " + score;
-            scores = new Integer[3];
-            final boolean highScore = false;
+//            scores = new Integer[3];
 
             imm.hideSoftInputFromWindow(iv.getWindowToken(),0);
 
-            Handler h = new Handler();
-            h.postDelayed(new Runnable() {
-                @Override
-                public void run() {
 
-                    for(int i = 0; i < scores.length; i++)
+            boolean highScore = false;
+
+            for(int i = 2; i >= 0; i--)
+            {
+                if(!highScore && score > 0)
+                {
+                    if(score > scores[i])
                     {
-                        if(!highScore && score > 0)
-                        {
-                            if(score > scores[i])
-                            {
-                                myRef.child(String.valueOf(i)).setValue(score);
-                            }
-                        }
+                        myRef.child(String.valueOf(i)).setValue(score);
+                        scores[i] = score;
+                        highScore = true;
                     }
+                }
+            }
 
-                    for(int i = 0; i < scores.length; i++)
-                    {
-                        Log.i(TAG," score " + i + " : " + scores[i]);
-                    }
+            for(int i = 0; i < scores.length; i++)
+            {
+                Log.i(TAG," score " + i + " : " + scores[i]);
+            }
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder .setCancelable(false)
-                            .setNeutralButton("Retry" , new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    retry = true;
-                                    newGame();
-                                }
-                            }).setPositiveButton("New Game" , new DialogInterface.OnClickListener() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder .setCancelable(false)
+                    .setNeutralButton("Retry" , new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            retry = true;
                             newGame();
                         }
-                    }).setNegativeButton("Exit" , new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            finishAndRemoveTask();
-                        }
-                    });
-
-                    if(highScore)
-                    {
-                        Log.i(TAG,"High score");
-                        builder.setTitle("High Score!")
-                                .setMessage(" 1.) " +scores[2] + "\n 2.) " + scores[1] + "\n 3.) " + scores[0])
-                                .show();
-                    }
-                    else
-                    {
-                        Log.i(TAG,"Game over");
-                        builder.setTitle("Game Over!")
-                                .setMessage(scoreText)
-                                .show();
-                    }
-
+                    }).setPositiveButton("New Game" , new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    newGame();
                 }
-            },500);
+            }).setNegativeButton("Exit" , new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    finishAndRemoveTask();
+                }
+            });
+
+            if(highScore)
+            {
+                Log.i(TAG,"High score");
+                builder.setTitle("High Score!")
+                        .setMessage(" 1.) " +scores[2] + "\n 2.) " + scores[1] + "\n 3.) " + scores[0])
+                        .show();
+            }
+            else
+            {
+                Log.i(TAG,"Game over");
+                builder.setTitle("Game Over!")
+                        .setMessage(scoreText)
+                        .show();
+            }
 
         }
         @Override

@@ -38,6 +38,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -89,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static boolean logout = false;
 
+    DatabaseReference myRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +104,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mContext = this;
 
-        /*
-
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-
-        myRef.setValue("Hello, World!");
+        myRef = database.getReference("word");
 
         // Read from the database
         myRef.addValueEventListener(new ValueEventListener() {
@@ -121,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        */
 
         // Toolbar that contains drop down settings icon
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
@@ -160,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
 
         randomWord();
         ogWord = word;
+
+        myRef.setValue(word);
 
         usedWords.add(word);
 
@@ -276,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
         if(contains(newWord) && !usedWords.contains(newWord))
         {
             Log.i(TAG,"VALID WORD");
+            myRef.setValue(newWord);
             countDown.cancel();
             countDown.start();
             score++;
@@ -348,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(contains(newWord)&& !usedWords.contains(newWord))
         {
+            myRef.setValue(newWord);
             currButton.setBackgroundColor(Color.RED);
             Handler h = new Handler();
             h.postDelayed(new Runnable() {

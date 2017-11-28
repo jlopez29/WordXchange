@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "511509615982-c336salla54s51hn72q4babnnt3u0s2b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jlgames.wordXchange",
+            "certificate_hash": "3d06e95e3d89e5bdb39eb604da317904c5c828ad"
+          }
+        },
+        {
           "client_id": "511509615982-irecoluuj2ngiv95bt6rmked7ihq1m3i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

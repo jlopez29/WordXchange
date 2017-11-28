@@ -1,4 +1,4 @@
-package com.example.jesse.test;
+package com.jlgames.wordXchange;
 
 /**
  * Created by jesse on 11/8/2017.
@@ -13,6 +13,8 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+
+import com.jlgames.wordXchange.R;
 
 
 public class SettingsActivity extends AppCompatActivity {

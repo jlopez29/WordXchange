@@ -1,6 +1,5 @@
-package com.example.jesse.test;
+package com.jlgames.wordXchange;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,11 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jlgames.wordXchange.R;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -28,8 +26,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
-import static com.example.jesse.test.MainActivity.logout;
 
 /**
  * Demonstrate Firebase Authentication using a Google ID Token.
@@ -115,16 +111,22 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        Log.e("Activity","Result");
+
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 // Google Sign In was successful, authenticate with Firebase
+
+                Log.e("Activity","Success");
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
             } else {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
+
+                Log.e("Activity","Failed : " + result.getStatus());
                 updateUI(null);
                 // [END_EXCLUDE]
             }
@@ -248,14 +250,14 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     public void onResume() {
         super.onResume();
         Log.e(TAG,"*** On Resume ***");
-        if(logout)
+        if(MainActivity.logout)
         {
             Handler h = new Handler();
             h.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    signOut();
-                    logout = false;
+                    revokeAccess();
+                    MainActivity.logout = false;
                 }
             },200);
 

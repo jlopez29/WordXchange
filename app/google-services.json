@@ -8,25 +8,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:511509615982:android:6653021092993d38",
+        "mobilesdk_app_id": "1:511509615982:android:bfe975e62296dfd6",
         "android_client_info": {
-          "package_name": "com.example.jesse.test"
+          "package_name": "com.jlgames.wordXchange"
         }
       },
       "oauth_client": [
         {
-          "client_id": "511509615982-qtlv10lqpsq2g376sncb5nu1al1bagde.apps.googleusercontent.com",
+          "client_id": "511509615982-irecoluuj2ngiv95bt6rmked7ihq1m3i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.jesse.test",
+            "package_name": "com.jlgames.wordXchange",
             "certificate_hash": "970ea811f29a414299b7a44db0f767fe71f22d1f"
           }
         },
         {
-          "client_id": "511509615982-ra32eg3a45d9b61guerieq662hr4753s.apps.googleusercontent.com",
+          "client_id": "511509615982-kfga4mjm95dd560sh4eav5jrp6ipdemq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.jesse.test",
+            "package_name": "com.jlgames.wordXchange",
             "certificate_hash": "2b2f68c4a9b55bdc22b8ae0d9e93726efb222ada"
           }
         },
